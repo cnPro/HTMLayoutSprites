@@ -1,7 +1,7 @@
 import win.ui;
 import win.ui.ctrl.expandeditor;
 /*DSG{{*/
-winform = ..win.form( text="HTMLayout 九宫格助手  作者: lujjjh  编写工具: AAuto";bottom=400;parent=...;right=600;border="resizable" )
+winform = ..win.form( right=600;acceptfiles=1;bottom=400;parent=...;text="HTMLayout 九宫格助手  作者: lujjjh  编写工具: AAuto" )
 winform.add(  )
 /*}}*/
 
@@ -14,13 +14,24 @@ var filename;
 
 openFile = function () {
 	import fsys.dlg;
-	filename = fsys.dlg.open("支持的图片格式(*.bmp,*.gif,*.png)|*.bmp;*.gif;*.png|不推荐的图片格式(*.jpg,*.jpeg)|*.jpg;*.jpeg|所有文件|*.*|", , , winform.hwnd);
+	var filename = fsys.dlg.open("支持的图片格式(*.bmp,*.gif,*.png)|*.bmp;*.gif;*.png|不推荐的图片格式(*.jpg,*.jpeg)|*.jpg;*.jpeg|所有文件|*.*|", , , winform.hwnd);
 	if (filename) {
 		winform.expandeditor.image = filename;
 		winform.expandeditor.onchange();
 		updateStretch(left = false; top = false; right = false; bottom = false; middle = false);
 	}
 }
+
+import fsys.mime
+win.form._defaultProc[0x233/*_WM_DROPFILES*/]  = function(this,hwnd, message, wParam, lParam){
+	var filename = win.getDropFile(wParam )[1]; 
+	if ( string.startWith(fsys.mime.fromFile(filename),"image/",true) ) {
+		winform.expandeditor.image = filename;
+		winform.expandeditor.onchange();
+		updateStretch(left = false; top = false; right = false; bottom = false; middle = false);
+	}
+}
+
 
 zoomIn = function () {
 	for (i = -5; 4) {
