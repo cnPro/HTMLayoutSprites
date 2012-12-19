@@ -1,0 +1,150 @@
+html
+{
+	font: system;
+}
+
+body
+{
+	margin: 0;
+}
+
+body > .toolbar
+{
+	style-set: "toolbar";
+}
+
+@set toolbar
+{
+	:root
+	{
+		margin: 0;
+		padding: 1px 8px;
+		background: threedface;
+		height: 24px;
+		flow: horizontal;
+	}
+
+	:root > div[id]
+	{
+		behavior: clickable;
+		display: block;
+		width: 21px;
+		height: 21px;
+		border: 1px solid threedface;
+		foreground-repeat: no-repeat;
+		foreground-position: 3px 3px;
+	}
+
+	:root > div[id]:hover
+	{
+		background: #c1d3ed;
+		border-color: #316ac5;
+	}
+
+	:root > div[id]:active
+	{
+		foreground-position: 4px 4px;
+	}
+
+	:root > div.sep
+	{
+		margin: 0 6px;
+		width: 0;
+		height: 80%;
+		border-left: 1px dotted #ccc;
+		border-right: 1px dotted #fff;
+		vertical-align: middle;
+	}
+}
+
+#toolbar_open
+{
+	foreground-image: url(../images/icons/open.ico);
+}
+
+#toolbar_zoom_in
+{
+	foreground-image: url(../images/icons/zoom-in.ico);
+}
+
+#toolbar_zoom_out
+{
+	foreground-image: url(../images/icons/zoom-out.ico);
+}
+
+#toolbar_preview
+{
+	foreground-image: url(../images/icons/preview.ico);
+}
+
+#toolbar_copy
+{
+	foreground-image: url(../images/icons/copy.ico);
+}
+
+body > .wrapper
+{ 
+	flow: horizontal;
+	width:100%%; height:100%%;   
+}
+
+.wrapper > .sidebar
+{
+	style-set: "sidebar";
+}
+
+@set sidebar
+{
+	:root
+	{
+		width: 150px;
+		height: *;
+	}
+
+	:root > div
+	{
+		margin: 8px;
+	}
+
+	:root > .stretch
+	{
+		flow: '1 2 3'
+			  '4 5 6'
+			  '7 8 9';
+	}
+
+	:root > .stretch > widget
+	{
+		padding: 0;
+		width: 24px;
+		height: 24px;
+	}
+}
+
+.hsplitter 
+{
+	height:100%%; 
+	width:4px;	  
+	border:1px solid threedshadow;
+	background-color:threedshadow;
+	behavior:splitter;
+	cursor:w-resize;
+	margin: 6px 0;
+}
+
+.hsplitter:hover
+{
+	background-color:threedface;
+	border-top:1px solid threedhighlight;
+	border-left:1px solid threedhighlight;
+	border-right:1px solid threeddarkshadow;
+	border-bottom:1px solid threeddarkshadow;
+}
+
+
+div.htmlarea
+{
+	behavior:htmlarea;
+        context-menu:selector(menu#for-htmlarea);
+        cursor:text;  
+} 

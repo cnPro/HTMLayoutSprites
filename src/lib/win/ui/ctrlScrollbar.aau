@@ -1,0 +1,120 @@
+import util.metaProperty;
+
+namespace win.ui;
+
+ctrlScrollbar = class {
+	ctor (ctrl) {
+		this._hwnd = ctrl.hwnd;
+		ctrl.tailWndproc = function(hwnd, message, wParam, lParam) {
+			if (message == 0x114/*_WM_HSCROLL*/) {
+				var pos = setScroll(this, 0x0/*_SB_HORZ*/, wParam);
+				if (this[["onscroll"]]) this[["onscroll"]](0x0/*_SB_HORZ*/, pos);
+			}
+			else if (message == 0x115/*_WM_VSCROLL*/) {
+				var pos = setScroll(this, 0x1/*_SB_VERT*/, wParam);
+				if (this[["onscroll"]]) this[["onscroll"]](0x1/*_SB_VERT*/, pos);
+			}
+		}
+	}
+	
+	@_metaProperty;
+}
+
+namespace ctrlScrollbar {
+	SetScrollPos = ::User32.api("SetScrollPos","bool(int hWnd,int bar,int pos,bool redraw)");
+	GetScrollPos = ::User32.api("GetScrollPos","int(int hWnd,int bar)");
+	SetScrollRange = ::User32.api("SetScrollRange","bool(int hWnd,int bar,int min,int max,bool redraw)");
+	GetScrollRange = ::User32.api("GetScrollRange","bool(int hWnd,int bar,int& min,int& max)");
+	ShowScrollBar = ::User32.api("ShowScrollBar","bool(int hWnd,int bar,bool show)");
+	EnableScrollBar = ::User32.api("EnableScrollBar","bool(int hWnd,INT flags,INT arrows)");
+	SetScrollInfo = ::User32.api("SetScrollInfo", "INT(int hWnd, int fnBar, struct lpsi, bool redraw)");
+	GetScrollInfo = ::User32.api("GetScrollInfo", "INT(int hWnd, int fnBar, struct& lpsi)");
+	
+	SCROLLINFO = class {
+		INT cbSize = 28;
+		INT fMask = 0;
+		int nMin;
+		int nMax;
+		INT nPage;
+		int nPos;
+		int nTrackPos;
+	}
+	
+	_metaProperty = ..win.ui.ctrl.metaProperty(
+		show = function (bar, show = true) {
+			if (type(bar) == type.table) {
+				for (k, v in bar)
+					ShowScrollBar(owner[["_hwnd"]], k, v);
+			}
+			return ShowScrollBar(owner[["_hwnd"]], bar, show);
+		}
+		
+		setInfo = function (bar, v, redraw = true) {
+			var sif = SCROLLINFO();
+			if (v.min !== null && v.max !== null) {
+				sif.fMask |= 0x01/*_SIF_RANGE*/;
+				sif.nMin = v.min;
+				sif.nMax = v.max;
+			}
+			if (v.page !== null) {
+				sif.fMask |= 0x02/*_SIF_PAGE*/;
+				sif.nPage = v.page;
+			}
+			if (v.pos !== null) {
+				sif.fMask |= 0x04/*_SIF_POS*/;
+				sif.nPos = v.pos;
+			}
+			return SetScrollInfo(owner[["_hwnd"]], bar, sif, redraw ? 1 : 0);
+		}
+		
+		getInfo = function (bar) {
+			var sif = SCROLLINFO();
+			sif.fMask = 0x1F/*_SIF_ALL*/;
+			GetScrollInfo(owner._hwnd, bar, sif);
+			return {
+				min = sif.nMin;
+				max = sif.nMax;
+				page = sif.nPage;
+				pos = sif.nPos;
+				tpos = sif.nTrackPos;
+			};
+		}
+		
+		enable = function(bar, flag = 0){
+			return EnableScrollBar(owner._hwnd, bar, flag);
+		}
+	);
+	
+	setScroll = function (this, bar, wParam) {
+		var info = this.getInfo(bar);
+		var req = ::LOWORD(wParam);
+		var max = info.max - info.page + 1;
+		select (req) {
+			case 0x0/*_SB_LINELEFT*/
+				info.pos = ..math.max(info.pos - ..math.floor(info.page / 5), info.min);
+			case 0x1/*_SB_LINERIGHT*/
+				info.pos = ..math.min(info.pos + ..math.floor(info.page / 5), max);
+			case 0x2/*_SB_PAGELEFT*/
+				info.pos = ..math.max(info.pos - info.page, info.min);
+			case 0x3/*_SB_PAGERIGHT*/
+				info.pos = ..math.min(info.pos + info.page, max);
+			case 0x5/*_SB_THUMBTRACK*/
+				info.pos = ::HIWORD(wParam);
+			case 0x6/*_SB_TOP*/
+				info.pos = info.min;
+			case 0x7/*_SB_BOTTOM*/
+				info.pos = max;
+		}
+		this.setInfo(bar, { pos = info.pos });
+		return info.pos;
+	}
+}
+
+/**intellisense()
+_SIF_ALL = @0x1F/*_SIF_ALL*/
+_SIF_DISABLENOSCROLL = @0x08/*_SIF_DISABLENOSCROLL*/
+_SIF_PAGE = @0x02/*_SIF_PAGE*/
+_SIF_POS = @0x04/*_SIF_POS*/
+_SIF_RANGE = @0x01/*_SIF_RANGE*/
+_SIF_TRACKPOS = @0x10/*_SIF_TRACKPOS*/
+end intellisense**/

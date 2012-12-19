@@ -1,0 +1,41 @@
+import win.ui;
+/*DSG{{*/
+var previewForm = ..win.form( exmode="none";bottom=503;parent=...;text="‘§¿¿";right=711 )
+previewForm.add(  )
+/*}}*/
+
+import web.layout;
+
+var previewLayout = web.layout(previewForm);
+
+previewForm.preview = function (imagePath, pos, stretchStyle) {
+	imagePath = string.replace(imagePath, ":", function (s) {
+		var a, b, c = string.unpack(string.fromto(s, 0, 65001));
+		io.print(s, string.format("%%%X%%%X%%%X", a, b, c));
+		return string.format("%%%X%%%X%%%X", a, b, c);
+	});
+	
+	previewLayout.html = /**
+	<body>
+	70 x 30: <div class="image" style="width: 70px; height: 30px;"></div>
+	100 x 50: <div class="image" style="width: 100px; height: 50px;"></div>
+	100%% x 100%%: <div class="image" style="width: *; height: *;"></div>
+	</body>
+	**/
+	
+	var css =/**
+	.image
+	{
+		background-image: url(%s);
+		background-repeat: expand%s;
+		background-position: %dpx %dpx %dpx %dpx;
+	}
+	**/;
+	previewLayout.css = string.format(css, imagePath, stretchStyle, pos.top, pos.right, pos.bottom, pos.left);
+	
+	io.print(string.format(css, imagePath, stretchStyle, pos.top, pos.right, pos.bottom, pos.left));
+}
+
+previewForm.show();
+win.loopMessage();
+return previewForm;

@@ -1,0 +1,55 @@
+﻿<html>
+<head>
+<link rel="stylesheet" href="styles/index.css" />
+
+<menu.context #for-htmlarea>
+	<li	command="htmlarea:copy"
+        style="foreground-image:url(res:edit-copy.png)"
+	>复制代码<span class="accesskey">Ctrl+C</span></li>
+	<li	command="htmlarea:selectall"
+	>全选代码<span class="accesskey">Ctrl+A</span></li>
+</menu>
+
+</head>
+<body>
+
+<div class="toolbar">
+	<div id="toolbar_open" title="打开图片"></div>
+	<div class="sep"></div>
+	<div id="toolbar_zoom_in" title="放大"></div>
+	<div id="toolbar_zoom_out" title="缩小"></div>
+	<div class="sep"></div>
+	<div id="toolbar_copy" title="复制代码"></div>
+</div>
+<div class="wrapper">
+	<widget cls="expandeditor" id="expandeditor" style="width: *; height: *;"></widget>
+	<hr class="hsplitter">
+	<div class="sidebar">
+		<div>拉伸：</div>
+		<div class="stretch">
+			<widget type="checkbox" role="left-top" disabled></widget>
+			<widget type="checkbox" role="top"></widget>
+			<widget type="checkbox" role="right-top" disabled></widget>
+			<widget type="checkbox" role="left"></widget>
+			<widget type="checkbox" role="middle"></widget>
+			<widget type="checkbox" role="right"></widget>
+			<widget type="checkbox" role="left-bottom" disabled></widget>
+			<widget type="checkbox" role="bottom"></widget>
+			<widget type="checkbox" role="right-bottom" disabled></widget>
+		</div>
+		
+		<div style="behavior: htmlarea; cursor: text;" .htmlarea  tabindex=0 readonly>
+			<div>
+				<span style="color: blue;">background-position:</span>
+				<span id="background-position"></span><span>;</span>
+			</div><br />
+			<div>
+				<span style="color: blue;">background-repeat:</span>
+				<span>expand</span><span id="expand-stretch"></span><span>;</span>
+			</div>
+		</div>
+		<div class="preview" style="width: *; height: *;"></div>
+	</div>
+</div>
+</body>
+</html>

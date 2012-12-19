@@ -1,0 +1,150 @@
+import win.ui;
+import win.ui.ctrl.expandeditor;
+/*DSG{{*/
+winform = ..win.form( text="HTMLayout 九宫格助手  作者: lujjjh  编写工具: AAuto";bottom=400;parent=...;right=600;border="resizable" )
+winform.add(  )
+/*}}*/
+
+import web.layout;
+import web.layout.behavior.splitter;
+
+var wbLayout = web.layout(winform);
+
+var filename;
+
+openFile = function () {
+	import fsys.dlg;
+	filename = fsys.dlg.open("支持的图片格式(*.bmp,*.gif,*.png)|*.bmp;*.gif;*.png|不推荐的图片格式(*.jpg,*.jpeg)|*.jpg;*.jpeg|所有文件|*.*|", , , winform.hwnd);
+	if (filename) {
+		winform.expandeditor.image = filename;
+		winform.expandeditor.onchange();
+		updateStretch(left = false; top = false; right = false; bottom = false; middle = false);
+	}
+}
+
+zoomIn = function () {
+	for (i = -5; 4) {
+		winform.expandeditor.zoom += 0.1;
+		win.delay(..math.abs(i) * 2);
+	}
+}
+
+zoomOut = function () {
+	for (i = -5; 4) {
+		winform.expandeditor.zoom -= 0.1;
+		win.delay(..math.abs(i) * 2);
+	}
+}
+
+generateCode = function () {
+	if (!filename) return;
+	var pos = winform.expandeditor.position;
+	var code = 'background-repeat: expand%s;\r\nbackground-position: %dpx %dpx %dpx %dpx;';
+	code = string.format(code, wbLayout.$1("#expand-stretch").value, pos.top, pos.right, pos.bottom, pos.left);
+	return code;
+}
+
+preview = function () {
+	if (!filename) return;
+	var imagePath = string.replace(filename, ":", function (s) {
+		var a, b, c = string.unpack(string.fromto(s, 0, 65001));
+		io.print(s, string.format("%%%X%%%X%%%X", a, b, c));
+		return string.format("%%%X%%%X%%%X", a, b, c);
+	});
+	var pos = winform.expandeditor.position;
+	var preview = wbLayout.$1(".sidebar .preview");
+	preview.style["background-image"] = "url(" + imagePath + ")";
+	preview.style["background-repeat"] = "expand" + wbLayout.$1("#expand-stretch").value;
+	preview.style["background-position"] = string.format("%dpx %dpx %dpx %dpx", pos.top, pos.right, pos.bottom, pos.left);
+}
+
+updateStretch = function (stretchOpt) {
+	if (stretchOpt) {
+		for (k, v in stretchOpt)
+			wbLayout.$1('.stretch widget[role=' + k + ']').state.checked = v;
+	}
+	var stretch = wbLayout.$('.stretch widget:checked');
+	var str = "";
+	for (k, v in stretch)
+		str += " stretch-" + v.role;
+	wbLayout.$1("#expand-stretch").value = str;
+	preview();
+}
+
+copyCode = function () {
+	import win.clip;
+	
+	if (!filename) {
+		winform.msgbox("请先打开图片文件。", "错误：", 0x30/*_MB_ICONEXCLAMATION*/);
+		return;
+	}
+	
+	win.clip.write(generateCode());
+	winform.msgbox("复制成功！", "提示：");
+}
+
+import win.ui.accelerator;
+
+var accel = win.ui.accelerator({
+	{ ctrl = true; vkey = 'O'#; oncommand = openFile }
+	{ ctrl = true; vkey = 0xBB/*_VK_PLUS*/; oncommand = zoomIn }
+	{ ctrl = true; vkey = 0xBD/*_VK_MINU*/; oncommand = zoomOut }
+}, winform);
+
+import win.ui.menu;
+var menu = win.ui.menu(winform);
+var mnFile = win.ui.popmenu(winform);
+mnFile.add('打开...\tCtrl+O', openFile);
+mnFile.add();
+mnFile.add("复制代码(&C)", copyCode);
+mnFile.add();
+mnFile.add('退出\tAlt+F4', function () {
+	winform.close();
+});
+var mnView = win.ui.popmenu(winform);
+mnView.add('放大(&I)\tCtrl+=', zoomIn);
+mnView.add('缩小(&O)\tCtrl+-', zoomOut);
+menu.add("文件(&F)", mnFile);
+menu.add("视图(&V)", mnView);
+
+wbLayout.onControlCreated = {
+	expandeditor = function( ltEle,ltCtrl ) {
+	 	winform.expandeditor = ltCtrl;
+	 	winform.expandeditor.onchange = function () {
+			var pos = winform.expandeditor.position;
+			wbLayout.$1("#background-position").value = string.format("%dpx %dpx %dpx %dpx", pos.top, pos.right, pos.bottom, pos.left);
+			preview();
+		}
+	}
+}
+
+wbLayout.onButtonClick = function (ltTarget,ltEle,reason,behaviorParams) {
+	select (ltEle.id) {
+		case "toolbar_open" {
+			openFile();
+		}
+		case "toolbar_zoom_in" {
+			zoomIn();
+		}
+		case "toolbar_zoom_out" {
+			zoomOut();
+		}
+		case "toolbar_copy" {
+			copyCode();
+		}
+		case null {
+			updateStretch();
+		}
+	}
+}
+
+wbLayout.go("/layout/index.htm");
+
+filename = "/res/button-hover.png";
+winform.expandeditor.image = string.load(filename);
+winform.expandeditor[["pos_"]] = ::RECT(4, 4, 4, 20);
+winform.expandeditor.onchange();
+updateStretch(left = true; top = true; right = true; bottom = true; middle = true);
+
+winform.show();
+win.loopMessage();

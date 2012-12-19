@@ -1,0 +1,304 @@
+import gdip;
+import win.cur;
+import win.graphics;
+import win.ui.ctrlScrollbar;
+import win.ui.ctrl.static;
+namespace win.ui.ctrl;
+
+expandeditor = class {
+	ctor (parent, tParam) {
+		tParam.cls = "ExpandEditor";
+		tParam.transparent = 0;
+		tParam.notify = 1;
+		
+		if(tParam.edge)   
+			tParam.exstyle |= 0x200/*_WS_EX_CLIENTEDGE*/;
+		
+		this[["zoom_"]] = 1;
+		this[["pos_"]] = ::RECT(0, 0, 0, 0);
+	}
+	
+	onCreate = function () {
+		this._hdc = ::GetDC(this.hwnd);
+		
+		this._scrollbar = ..win.ui.ctrlScrollbar(this);
+		this._scrollbar.onscroll = function (bar, pos) {
+			this.redraw();
+		}
+		
+		this._cvsCache = ..win.graphics.canvas();
+		this._cvsCache.create();
+		this._cvsCache.stretchBltMode = 0x1/*_STRETCH_ANDSCANS*/;
+		
+		this.wndproc = {
+			[0x14/*_WM_ERASEBKGND*/] = function (hwnd, message, wParam, lParam) {
+				return 0;
+			}
+			 
+			[0xF/*_WM_PAINT*/] = function (hwnd, message, wParam, lParam) {
+				var clientRect = this.clientRect;
+				
+				var cvs = ..win.graphics.canvas();
+				cvs.beginPaint(hwnd);
+				var cvsMem = ..win.graphics.canvas();
+				cvsMem.create();
+				var imgMem = ..win.graphics.image(cvs.handle, clientRect.right, clientRect.bottom);
+				cvsMem.image = imgMem;
+				cvsMem.brush.color = 0xC0C0C0;
+				cvsMem.fillRect(clientRect);
+				if (this[["image_"]]) {
+					var cvsCache = this._cvsCache;
+					var hinfo = this._scrollbar.getInfo(0x0/*_SB_HORZ*/);
+					var vinfo = this._scrollbar.getInfo(0x1/*_SB_VERT*/);
+					hinfo.pos -= 10;
+					vinfo.pos -= 10;
+					cvsCache.bitBlt(cvsMem, 0, 0, clientRect.right, clientRect.bottom, hinfo.pos + 1, vinfo.pos + 1);
+					// 画九宫格
+					var width = this[["imageWidth_"]];
+					var height = this[["imageHeight_"]];
+					var pos = this[["pos_"]];
+					var zoom = this[["zoom_"]];
+					cvsMem.pen.color = 0x0000FF;
+					// 左
+					cvsMem.moveTo(pos.left * zoom - hinfo.pos, 0);
+					cvsMem.lineTo(pos.left * zoom - hinfo.pos, clientRect.bottom);
+					// 上
+					cvsMem.moveTo(0, pos.top * zoom - vinfo.pos);
+					cvsMem.lineTo(clientRect.right, pos.top * zoom - vinfo.pos);
+					// 右
+					cvsMem.moveTo((width - pos.right) * zoom - hinfo.pos, 0);
+					cvsMem.lineTo((width - pos.right) * zoom - hinfo.pos, clientRect.bottom);
+					// 下
+					cvsMem.moveTo(0, (height - pos.bottom) * zoom - vinfo.pos);
+					cvsMem.lineTo(clientRect.right, (height - pos.bottom) * zoom - vinfo.pos);
+				}
+				cvsMem.bitBlt(cvs, 0, 0, clientRect.right, clientRect.bottom);
+				cvsMem.image = null;
+				imgMem.destroy();
+				cvsMem.destroy();
+				cvs.endPaint();
+				return 0;
+			}
+			
+			[0x200/*_WM_MOUSEMOVE*/] = function (hwnd, message, wParam, lParam) {
+				var x = ::LOWORD(lParam);
+				var y = ::HIWORD(lParam);
+				
+				var t = this[["set_"]];
+				select (t : this.hittest(x, y)) {
+					case 0xA/*_HTLEFT*/, 0xB/*_HTRIGHT*/
+						..win.cur.setCur(..win.cur.load(0x7F84/*_IDC_SIZEWE*/));
+					case 0xC/*_HTTOP*/, 0xF/*_HTBOTTOM*/
+						..win.cur.setCur(..win.cur.load(0x7F85/*_IDC_SIZENS*/));
+				}
+				
+				if (t) {
+					var hinfo = this._scrollbar.getInfo(0x0/*_SB_HORZ*/);
+					var vinfo = this._scrollbar.getInfo(0x1/*_SB_VERT*/);
+					hinfo.pos -= 10;
+					vinfo.pos -= 10;
+					var width = this[["imageWidth_"]];
+					var height = this[["imageHeight_"]];
+					var pos = this[["pos_"]];
+					var zoom = this[["zoom_"]];
+					
+					select (t) {
+						case 0xA/*_HTLEFT*/ {
+							pos.left = ..math.round((x + hinfo.pos) / zoom);
+							if (pos.left < 0 || pos.left > 10000) pos.left = 0;
+							if (pos.left + pos.right >= width) pos.left = width - pos.right - 1;
+						}
+						case 0xC/*_HTTOP*/ {
+							pos.top = ..math.round((y + vinfo.pos) / zoom);
+							if (pos.top < 0 || pos.top > 10000) pos.top = 0;
+							if (pos.top + pos.bottom >= height) pos.top = height - pos.bottom - 1;
+						}
+						case 0xB/*_HTRIGHT*/ {
+							pos.right = width - ..math.round((x + hinfo.pos) / zoom);
+							if (pos.right < 0) pos.right = 0;
+							if (pos.left + pos.right >= width || pos.right > 10000) pos.right = width - pos.left - 1;
+						}
+						case 0xF/*_HTBOTTOM*/ {
+							pos.bottom = height - ..math.round((y + vinfo.pos) / zoom);
+							if (pos.bottom < 0) pos.bottom = 0;
+							if (pos.top + pos.bottom >= height || pos.bottom > 10000) pos.bottom = height - pos.top - 1;
+						}
+					}
+					
+					if (this[["onchange"]]) this[["onchange"]]();
+					this.redraw();
+				}
+			}
+			
+			[0x201/*_WM_LBUTTONDOWN*/] = function (hwnd, message, wParam, lParam) {
+				var x = ::LOWORD(lParam);
+				var y = ::HIWORD(lParam);
+				
+				var t = this.hittest(x, y);
+				if (t !== 1/*_HTCLIENT*/) {
+					this.capture = true;
+					this[["set_"]] = t;
+				}
+			}
+			
+			[0x202/*_WM_LBUTTONUP*/] = function (hwnd, message, wParam, lParam) {
+				this.capture = false;
+				this[["set_"]] = null;
+			}
+			
+			[0x5/*_WM_SIZE*/] = function (hwnd, message, wParam, lParam) {
+				this.adjustScroll();
+			}
+		}
+	}
+	
+	onDestroy = function () {
+		::ReleaseDC(this.hwnd, this._hdc);
+	}
+	
+	@_metaProperty;
+}
+
+expandeditor._metaProperty = ..table.mixin(
+	static._metaProperty,
+	metaProperty(
+		image = {
+			_set = function (v) {
+				if (owner[["image_"]]) {
+					owner[["image_"]].destroy();
+					owner[["cvsImage_"]].destroy();
+				}
+				
+				var gdipImage = ..gdip.image(v);
+				var width = gdipImage.width;
+				var height = gdipImage.height;
+				var cvs = ..win.graphics.canvas();
+				cvs.create();
+				var image = ..win.graphics.image(owner._hdc, width, height);
+				cvs.image = image.handle;
+				var graphics = ..gdip.graphics(cvs.handle);
+				graphics.clear(0xFFFFFFFF);
+				graphics.drawImageRectRectI(gdipImage, 0, 0, width, height, 0, 0, width, height);
+				graphics.delete();
+				owner[["image_"]] = image;
+				owner[["cvsImage_"]] = cvs;
+				owner[["imageWidth_"]] = gdipImage.width;
+				owner[["imageHeight_"]] = gdipImage.height;
+				
+				owner[["pos_"]] = ::RECT(0, 0, 0, 0);
+				owner[["zoom_"]] = 1;
+				owner.flushCache();
+				owner.adjustScroll();
+				owner.redraw();
+			}
+		}
+		
+		zoom = {
+			_set = function (v) {
+				if (v < 1 || v > 16) return;
+				owner[["zoom_"]] = v;
+				owner.flushCache();
+				owner.adjustScroll();
+				owner.redraw();
+			}
+			_get = function () {
+				return owner[["zoom_"]];
+			}
+		}
+		
+		flushCache = function () {
+			if (!owner[["image_"]]) return false;
+			
+			if (owner[["cacheBitmap_"]]) {
+				owner._cvsCache.image = null;
+				::DeleteObject(owner[["cacheBitmap_"]]);
+			}
+			
+			var zoom = owner[["zoom_"]];
+			var width = owner[["imageWidth_"]];
+			var height = owner[["imageHeight_"]];
+			var outWidth = width * zoom;
+			var outHeight = height * zoom;
+			
+			var cvsImage = owner[["cvsImage_"]];
+			var cvsCache = owner._cvsCache;
+			
+			owner[["cacheBitmap_"]] = ::CreateCompatibleBitmap(owner._hdc, outWidth + 2, outHeight + 2);
+			cvsCache.image = owner[["cacheBitmap_"]];
+			cvsImage.copyTo(cvsCache, 1, 1, outWidth, outHeight, 0, 0, width, height);
+			cvsCache.pen.color = 0x000000;
+			cvsCache.frameRect(::RECT(0, 0, outWidth + 2, outHeight + 2));
+		}
+		
+		adjustScroll = function () {
+			var page = 500;
+			
+			var func = function () {
+				if (owner[["image_"]]) {
+					var width = owner[["imageWidth_"]] * owner[["zoom_"]];
+					var height = owner[["imageHeight_"]] * owner[["zoom_"]];
+					var clientRect = owner.clientRect;
+					if (width > clientRect.right) {
+						owner._scrollbar.setInfo(0x0/*_SB_HORZ*/, { min = 0; max = width - clientRect.right + page - 1 + 20; page = page });
+						owner._scrollbar.show(0x0/*_SB_HORZ*/);
+					}
+					else {
+						owner._scrollbar.setInfo(0x0/*_SB_HORZ*/, { pos = 0 });
+						owner._scrollbar.show(0x0/*_SB_HORZ*/, false);
+					}
+					if (height > clientRect.bottom) {
+						owner._scrollbar.setInfo(0x1/*_SB_VERT*/, { min = 0; max = height - clientRect.bottom + page - 1 + 20; page = page });
+						owner._scrollbar.show(0x1/*_SB_VERT*/);
+					}
+					else {
+						owner._scrollbar.setInfo(0x1/*_SB_VERT*/, { pos = 0 });
+						owner._scrollbar.show(0x1/*_SB_VERT*/, false);
+					}
+				}
+			}
+			call(func, owner);
+			call(func, owner);
+			owner.redraw();
+		}
+		
+		hittest = function (x, y) {
+			if (!owner[["image_"]]) return 1/*_HTCLIENT*/;
+			var hinfo = owner._scrollbar.getInfo(0x0/*_SB_HORZ*/);
+			var vinfo = owner._scrollbar.getInfo(0x1/*_SB_VERT*/);
+			hinfo.pos -= 10;
+			vinfo.pos -= 10;
+			var width = owner[["imageWidth_"]];
+			var height = owner[["imageHeight_"]];
+			var pos = owner[["pos_"]];
+			var zoom = owner[["zoom_"]];
+			
+			if (..math.abs(x - pos.left * zoom + hinfo.pos) <= 3)
+				return 0xA/*_HTLEFT*/;
+			if (..math.abs(y - pos.top * zoom + vinfo.pos) <= 3)
+				return 0xC/*_HTTOP*/;
+			if (..math.abs(x - (width - pos.right) * zoom + hinfo.pos) <= 3)
+				return 0xB/*_HTRIGHT*/;
+			if (..math.abs(y - (height - pos.bottom) * zoom + vinfo.pos) <= 3)
+				return 0xF/*_HTBOTTOM*/;
+			
+			return 1/*_HTCLIENT*/;
+		}
+		
+		position = {
+			_get = function () {
+				return owner[["pos_"]];
+			}
+		}
+	)
+);
+
+namespace expandeditor {
+	// 注册窗口类，超类化
+	var GetClassInfoEx = ::User32.api("GetClassInfoExA", "int(pointer,string,struct&)");
+	var wc = ::WNDCLASSEX();
+	if ( ! ::GetClassInfo(_HINSTANCE, "ExpandEditor", wc)) {
+		GetClassInfoEx(_HINSTANCE, "#32770", wc);
+		wc.lpszClassName = "ExpandEditor";
+		..win.form.RegisterClassEx(wc);
+	}
+}

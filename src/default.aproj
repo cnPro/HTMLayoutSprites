@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="gb2312"?>
+<project ver="0.60" name="HTMLayout 九宫格助手" libEmbed="true" icon="..." CompanyName="单位名称" FileDescription="附加说明......" LegalCopyright="Copyright (C) 作者 2011" ProductName="HTMLayout 九宫格助手" InternalName="HTMLayout 九宫格助手" FileVersion="0.0.1.001" ProductVersion="0.0.1.001" publishDir="/Publish/">
+	<file name="main.aau" path="main.aau"/>
+	<folder name="资源文件" path="res" embed="true">
+		<file name="button-hover.png" path="res\button-hover.png" comment="res\button-hover.png"/>
+	</folder>
+	<folder name="layout" path="layout" comment="" embed="true">
+		<file name="index.htm" path="layout\index.htm" comment="layout\index.htm"/>
+		<folder name="images" path="layout\images" comment="layout\images">
+			<folder name="icons" path="layout\images\icons" comment="layout\images\icons">
+				<file name="zoom-out.ico" path="layout\images\icons\zoom-out.ico" comment="layout\images\icons\zoom-out.ico"/>
+				<file name="zoom-in.ico" path="layout\images\icons\zoom-in.ico" comment="layout\images\icons\zoom-in.ico"/>
+				<file name="open.ico" path="layout\images\icons\open.ico" comment="layout\images\icons\open.ico"/>
+				<file name="copy.ico" path="layout\images\icons\copy.ico" comment="layout\images\icons\copy.ico"/>
+			</folder>
+		</folder>
+		<folder name="styles" path="layout\styles" comment="layout\styles">
+			<file name="index.css" path="layout\styles\index.css" comment="layout\styles\index.css"/>
+		</folder>
+	</folder>
+	<folder name="forms" path="forms" comment="" embed="true">
+		<file name="preview.aau" path="forms\preview.aau" comment="forms\preview.aau"/>
+	</folder>
+</project>
