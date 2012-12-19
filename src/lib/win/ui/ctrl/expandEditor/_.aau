@@ -195,7 +195,7 @@ expandeditor._metaProperty = ..table.mixin(
 		
 		zoom = {
 			_set = function (v) {
-				if (v < 1 || v > 16) return;
+				if (v < 0.2 || v > 16) return;
 				owner[["zoom_"]] = v;
 				owner.flushCache();
 				owner.adjustScroll();
