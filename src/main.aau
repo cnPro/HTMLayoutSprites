@@ -1,15 +1,14 @@
 import win.ui;
 import win.ui.ctrl.expandeditor;
 /*DSG{{*/
-winform = ..win.form( right=600;acceptfiles=1;bottom=400;parent=...;text="HTMLayout 九宫格助手  作者: lujjjh  编写工具: AAuto" )
+winform = ..win.form( text="HTMLayout 九宫格助手  作者: lujjjh  编写工具: AAuto";acceptfiles=1;bottom=400;parent=...;right=600 )
 winform.add(  )
 /*}}*/
 
 import web.layout;
 import web.layout.behavior.splitter;
 
-var wbLayout = web.layout(winform);
-
+var wbLayout = web.layout(winform); 
 var filename;
 
 openFile = function () {
@@ -24,7 +23,7 @@ openFile = function () {
 
 import fsys.mime
 win.form._defaultProc[0x233/*_WM_DROPFILES*/]  = function(this,hwnd, message, wParam, lParam){
-	var filename = win.getDropFile(wParam )[1]; 
+	filename = win.getDropFile(wParam )[1]; 
 	if ( string.startWith(fsys.mime.fromFile(filename),"image/",true) ) {
 		winform.expandeditor.image = filename;
 		winform.expandeditor.onchange();
@@ -48,10 +47,10 @@ zoomOut = function () {
 }
 
 generateCode = function () {
-	if (!filename) return;
+	if (!filename) return; 
 	var pos = winform.expandeditor.position;
-	var code = 'background-repeat: expand%s;\r\nbackground-position: %dpx %dpx %dpx %dpx;';
-	code = string.format(code, wbLayout.$1("#expand-stretch").value, pos.top, pos.right, pos.bottom, pos.left);
+	var code = 'background-image:url(%s);\r\nbackground-repeat: expand%s;\r\nbackground-position: %dpx %dpx %dpx %dpx;';
+	code = string.format(code, fsys.getFileName(filename), wbLayout.$1("#expand-stretch").value, pos.top, pos.right, pos.bottom, pos.left);
 	return code;
 }
 
