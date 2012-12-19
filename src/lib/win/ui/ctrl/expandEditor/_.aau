@@ -293,11 +293,10 @@ expandeditor._metaProperty = ..table.mixin(
 );
 
 namespace expandeditor {
-	// 注册窗口类，超类化
-	var GetClassInfoEx = ::User32.api("GetClassInfoExA", "int(pointer,string,struct&)");
+	// 注册窗口类，超类化 
 	var wc = ::WNDCLASSEX();
-	if ( ! ::GetClassInfo(_HINSTANCE, "ExpandEditor", wc)) {
-		GetClassInfoEx(_HINSTANCE, "#32770", wc);
+	if ( ! ::GetClassInfoEx(_HINSTANCE, "ExpandEditor", wc)) {
+		::GetClassInfoEx(_HINSTANCE, "#32770", wc);
 		wc.lpszClassName = "ExpandEditor";
 		..win.form.RegisterClassEx(wc);
 	}

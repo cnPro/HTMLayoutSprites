@@ -1,7 +1,8 @@
+
 import win.ui;
 import win.ui.ctrl.expandeditor;
 /*DSG{{*/
-winform = ..win.form( text="HTMLayout 九宫格助手  作者: lujjjh  编写工具: AAuto";acceptfiles=1;bottom=526;parent=...;right=775 )
+winform = ..win.form( right=775;acceptfiles=1;bottom=526;parent=...;text="HTMLayout 九宫格助手  作者: lujjjh  编写工具: AAuto" )
 winform.add(  )
 /*}}*/
 
