@@ -298,6 +298,6 @@ namespace expandeditor {
 	if ( ! ::GetClassInfoEx(_HINSTANCE, "ExpandEditor", wc)) {
 		::GetClassInfoEx(_HINSTANCE, "#32770", wc);
 		wc.lpszClassName = "ExpandEditor";
-		..win.form.RegisterClassEx(wc);
+		::RegisterClassEx(wc);
 	}
 }
