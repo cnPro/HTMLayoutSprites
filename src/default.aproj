@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="gb2312"?>
-<project ver="0.60" name="HTMLayout 九宫格助手" libEmbed="true" icon="\app.ico" CompanyName="lujjjh" FileDescription="HTMLayout 九宫格助手" LegalCopyright="Copyright (C) lujjjh 2012" ProductName="HTMLayout 九宫格助手" InternalName="HTMLayout 九宫格助手" FileVersion="1.0.1.001" ProductVersion="1.0.1.001" publishDir="/Publish/">
+<project ver="0.60" name="HTMLayout 九宫格助手" libEmbed="true" icon="\app.ico" CompanyName="lujjjh" FileDescription="HTMLayout 九宫格助手" LegalCopyright="Copyright (C) lujjjh 2012" ProductName="HTMLayout 九宫格助手" InternalName="HTMLayout 九宫格助手" FileVersion="1.0.1.001" ProductVersion="1.0.1.001" publishDir="/Publish/" ui="win" output="HTMLayout 九宫格助手.exe">
 	<file name="main.aau" path="main.aau"/>
 	<folder name="资源文件" path="res" embed="true">
 		<file name="button-hover.png" path="res\button-hover.png" comment="res\button-hover.png"/>
 	</folder>
 	<folder name="layout" path="layout" comment="" embed="true">
 		<file name="index.htm" path="layout\index.htm" comment="layout\index.htm"/>
-		<folder name="images" path="layout\images" comment="layout\images">
-			<folder name="icons" path="layout\images\icons" comment="layout\images\icons">
+		<folder name="images" path="layout\images" comment="layout\images" embed="false">
+			<folder name="icons" path="layout\images\icons" comment="layout\images\icons" embed="false">
 				<file name="zoom-out.ico" path="layout\images\icons\zoom-out.ico" comment="layout\images\icons\zoom-out.ico"/>
 				<file name="zoom-in.ico" path="layout\images\icons\zoom-in.ico" comment="layout\images\icons\zoom-in.ico"/>
 				<file name="open.ico" path="layout\images\icons\open.ico" comment="layout\images\icons\open.ico"/>
