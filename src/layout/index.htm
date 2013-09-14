@@ -4,7 +4,7 @@
 
 <menu.context #for-htmlarea>
 	<li	command="htmlarea:copy"
-        style="foreground-image:url(res:edit-copy.png)"
+        style="foreground-image:url(res:edit-copy.png)" #htmlarea-copy
 	>复制代码<span class="accesskey">Ctrl+C</span></li>
 	<li	command="htmlarea:selectall"
 	>全选代码<span class="accesskey">Ctrl+A</span></li>
@@ -39,18 +39,16 @@
 		</div>
 		
 		<div style="behavior: htmlarea; cursor: text;" .htmlarea  tabindex=0 readonly>
-			<div>
+			<p>
 				<span style="color: blue;">background-image:</span>
 				<span>url(</span><span id="background-image">button-hover.png</span><span>);</span>
-			</div> 
-			<div>
+			<br >  
 				<span style="color: blue;">background-position:</span>
 				<span id="background-position"></span><span>;</span>
-			</div> 
-			<div>
+			<br > 
 				<span style="color: blue;">background-repeat:</span>
 				<span>expand</span><span id="expand-stretch"></span><span>;</span>
-			</div>
+			</p>
 		</div>
 		<div class="preview" style="width: *; height: *;"></div>
 	</div>

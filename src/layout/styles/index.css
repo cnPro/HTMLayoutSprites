@@ -145,6 +145,11 @@ body > .wrapper
 div.htmlarea
 {
 	behavior:htmlarea;
-        context-menu:selector(menu#for-htmlarea);
-        cursor:text;  
+    context-menu:selector(menu#for-htmlarea);
+    cursor:text;    
+	padding:2px;
+} 
+div.htmlarea:hover
+{
+	background:#eee;   
 } 

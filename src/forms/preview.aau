@@ -1,6 +1,6 @@
 import win.ui;
 /*DSG{{*/
-var previewForm = ..win.form( exmode="none";bottom=503;parent=...;text="‘§¿¿";right=711 )
+var previewForm = ..win.form( exmode="none";bottom=503;parent=...;right=711;text="‘§¿¿" )
 previewForm.add(  )
 /*}}*/
 
@@ -30,8 +30,6 @@ previewForm.preview = function (imagePath, pos, stretchStyle) {
 	}
 	**/;
 	previewLayout.css = string.format(css, imagePath, stretchStyle, pos.top, pos.right, pos.bottom, pos.left);
-	
-	io.print(string.format(css, imagePath, stretchStyle, pos.top, pos.right, pos.bottom, pos.left));
 }
 
 previewForm.show();

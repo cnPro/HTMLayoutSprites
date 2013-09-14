@@ -2,35 +2,61 @@
 import win.ui;
 import win.ui.ctrl.expandeditor;
 /*DSG{{*/
-winform = ..win.form( right=775;acceptfiles=1;bottom=526;parent=...;text="HTMLayout 九宫格助手  作者: lujjjh  编写工具: AAuto" )
+winform = ..win.form( acceptfiles=1;bottom=526;parent=...;text="HTMLayout 九宫格助手  作者: lujjjh  编写工具: AAuto";right=775 )
 winform.add(  )
 /*}}*/
 
 import web.layout;
 import web.layout.behavior.splitter;
+var wbLayout = web.layout(winform);  
 
-var wbLayout = web.layout(winform); 
-var filename;
+updateImagePath = function(path){
+	winform.imagePath = path;
+	winform.expandeditor.image = path;
+	winform.expandeditor.onchange();
+	updateStretch(left = false; top = false; right = false; bottom = false; middle = false);
+	
+	var htmldir,relativeName;
+	while( 
+		var dir = path;
+		dir =  fsys.getParentDir(dir);
+		dir
+	) {  
+		fsys.enum( dir, { "*.css";"*.htm";"*.html";"*.aau"},
+			function(dir,filename,fullpath,findData){ 
+				if(filename){ 
+					htmldir = fsys.getParentDir(fullpath);
+			        return false;
+				} 
+			} ,false
+		);
+		
+		if( htmldir ){
+			relativeName = fsys.path.relative(path,htmldir,false); 
+			break;
+		}
+	}
+	if( !htmldir ){
+		relativeName = fsys.getFileName(path) 
+	}
+	
+	winform.imageRelativeName = relativeName;
+	wbLayout.$1("#background-image").value = relativeName;	
+}
 
 openFile = function () {
 	import fsys.dlg;
 	var filename = fsys.dlg.open("支持的图片格式(*.bmp,*.gif,*.png)|*.bmp;*.gif;*.png|不推荐的图片格式(*.jpg,*.jpeg)|*.jpg;*.jpeg|所有文件|*.*|", , , winform.hwnd);
 	if (filename) {
-		winform.expandeditor.image = filename;
-		winform.expandeditor.onchange();
-		updateStretch(left = false; top = false; right = false; bottom = false; middle = false);
-		wbLayout.$1("#background-image").value = fsys.getFileName(filename);
+		updateImagePath(filename);
 	}
 }
 
 import fsys.mime
 win.form._defaultProc[0x233/*_WM_DROPFILES*/]  = function(this,hwnd, message, wParam, lParam){
-	filename = win.getDropFile(wParam )[1]; 
-	if ( string.startWith(fsys.mime.fromFile(filename),"image/",true) ) {
-		winform.expandeditor.image = filename;
-		winform.expandeditor.onchange();
-		updateStretch(left = false; top = false; right = false; bottom = false; middle = false);
-		wbLayout.$1("#background-image").value = fsys.getFileName(filename);
+	var filename = win.getDropFile(wParam )[1]; 
+	if ( string.startWith(fsys.mime.fromFile(filename),"image/",true) ) { 
+		updateImagePath(filename);
 	}
 }
 
@@ -50,18 +76,17 @@ zoomOut = function () {
 }
 
 generateCode = function () {
-	if (!filename) return; 
+	if (!winform.imagePath) return; 
 	var pos = winform.expandeditor.position;
 	var code = 'background-image:url(%s);\r\nbackground-repeat: expand%s;\r\nbackground-position: %dpx %dpx %dpx %dpx;';
-	code = string.format(code, fsys.getFileName(filename), wbLayout.$1("#expand-stretch").value, pos.top, pos.right, pos.bottom, pos.left);
+	code = string.format(code,winform.imageRelativeName, wbLayout.$1("#expand-stretch").value, pos.top, pos.right, pos.bottom, pos.left);
 	return code;
 }
 
 preview = function () {
-	if (!filename) return;
-	var imagePath = string.replace(filename, ":", function (s) {
-		var a, b, c = string.unpack(string.fromto(s, 0, 65001));
-		io.print(s, string.format("%%%X%%%X%%%X", a, b, c));
+	if (!winform.imagePath) return;
+	var imagePath = string.replace(winform.imagePath, ":", function (s) {
+		var a, b, c = string.unpack(string.fromto(s, 0, 65001)); 
 		return string.format("%%%X%%%X%%%X", a, b, c);
 	});
 	var pos = winform.expandeditor.position;
@@ -87,7 +112,7 @@ updateStretch = function (stretchOpt) {
 copyCode = function () {
 	import win.clip;
 	
-	if (!filename) {
+	if (!winform.imagePath) {
 		winform.msgbox("请先打开图片文件。", "错误：", 0x30/*_MB_ICONEXCLAMATION*/);
 		return;
 	}
@@ -150,11 +175,27 @@ wbLayout.onButtonClick = function (ltTarget,ltEle,reason,behaviorParams) {
 		}
 	}
 }
+ 
+import win.clip;
+wbLayout.sinking = {
+	onMenuItemClick = {
+		["htmlarea-copy"] = function (ltTarget,ltEle,reason,behaviorParams) {
+			//得到当前弹出菜单的节点
+			var ltOwner = ..web.layout.element( behaviorParams.he )  
+			var str = ltOwner.innerText; 
+			
+			//修正HTMLayout复制后丢失换行符问题
+			str  = ..string.replace( str,'\r\n*','\r\n');
+			win.clip.write(str)
+			return true; //阻止默认行为
+		}
+	}
+}
 
 wbLayout.go("/layout/index.htm");
 
-filename = "/res/button-hover.png";
-winform.expandeditor.image = string.load(filename);
+updateImagePath( "/res/button-hover.png" );
+winform.expandeditor.image = string.load(winform.imagePath);
 winform.expandeditor[["pos_"]] = ::RECT(4, 4, 4, 20);
 winform.expandeditor.onchange();
 updateStretch(left = true; top = true; right = true; bottom = true; middle = true);
