@@ -2,7 +2,7 @@
 import win.ui;
 import win.ui.ctrl.expandeditor;
 /*DSG{{*/
-winform = ..win.form( acceptfiles=1;bottom=526;parent=...;text="HTMLayout 九宫格助手  作者: lujjjh  编写工具: AAuto";right=775 )
+winform = ..win.form( acceptfiles=1;bottom=526;parent=...;right=775;text="HTMLayout 九宫格助手  作者: lujjjh  编写工具: AAuto" )
 winform.add(  )
 /*}}*/
 
@@ -194,7 +194,7 @@ wbLayout.sinking = {
 
 wbLayout.go("/layout/index.htm");
 
-updateImagePath( "/res/button-hover.png" );
+winform.imagePath =  "/res/button-hover.png";
 winform.expandeditor.image = string.load(winform.imagePath);
 winform.expandeditor[["pos_"]] = ::RECT(4, 4, 4, 20);
 winform.expandeditor.onchange();
